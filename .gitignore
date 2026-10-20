@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Secrets - never commit
+.env
+
+# Virtual environment
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs and temp
+*.log

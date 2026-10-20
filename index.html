@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Call Assistant</title>
+    <meta name="description" content="Live AI Voice Assistant that transcribes speech, responds conversationally, and generates voice output.">
+    <meta property="og:title" content="AI Call Assistant">
+    <meta property="og:description" content="Live AI Voice Assistant that transcribes speech, responds conversationally, and generates voice output.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            padding: 24px 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .main-wrapper {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Nav Header */
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            padding: 28px 32px 20px;
+            color: #ffffff;
+        }
+
+        .header-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.25);
+            border: 1px solid #10b981;
+            color: #a7f3d0;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+
+        /* Tab Navigation */
+        .tab-bar {
+            display: flex;
+            background: rgba(15, 23, 42, 0.35);
+            border-radius: 12px;
+            padding: 4px;
+            margin-top: 20px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: transparent;
+            color: #cbd5e1;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: #1e293b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .content-body {
+            padding: 28px 32px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Voice Assistant View */
+        .status {
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .status.idle {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status.recording {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status.processing {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .record-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .record-btn:hover {
+            background: #059669;
+        }
+
+        .record-btn.recording {
+            background: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+
+        .reset-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            flex: 0.4;
+        }
+
+        .reset-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Text Input Section */
+        .text-input-section {
+            margin-bottom: 24px;
+        }
+
+        .text-input-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .send-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #2563eb;
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .quick-prompt-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 4px;
+        }
+
+        .chip-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .chip-btn:hover {
+            background: #e0e7ff;
+            border-color: #6366f1;
+            color: #4338ca;
+        }
+
+        /* Conversation List */
+        .conversation {
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message.transfer {
+            align-self: center;
+            max-width: 95%;
+            width: 100%;
+        }
+
+        .message-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .message.user .message-label {
+            text-align: right;
+            color: #3b82f6;
+        }
+
+        .message.bot .message-label {
+            color: #10b981;
+        }
+
+        .message-text {
+            padding: 12px 18px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-text {
+            background: #3b82f6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-text {
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border-bottom-left-radius: 4px;
+        }
+
+        .transfer-banner {
+            background: #eff6ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #1e3a8a;
+        }
+
+        .transfer-banner .icon {
+            font-size: 2rem;
+        }
+
+        .transfer-banner .details {
+            flex: 1;
+        }
+
+        .transfer-banner .title {
+            font-weight: 800;
+            font-size: 1rem;
+            color: #1d4ed8;
+        }
+
+        .transfer-banner .sip-info {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        .audio-player {
+            margin-top: 10px;
+            width: 100%;
+            height: 36px;
+        }
+
+        /* Error Banner */
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid #fecaca;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .open-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white !important;
+            text-decoration: none;
+            font-weight: 700;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        /* AI Voice Phone Call Screen */
+        .call-card {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 20px;
+            padding: 24px 28px;
+            color: #ffffff;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .call-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .call-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .call-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .call-status-badge.in-call {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+
+        .call-status-badge.ringing {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.4);
+            animation: pulse 1s infinite;
+        }
+
+        .call-timer {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
+        .call-avatar-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .agent-avatar-wrap {
+            position: relative;
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .agent-avatar-wrap.talking {
+            animation: avatarPulse 1.2s infinite ease-in-out;
+            box-shadow: 0 0 35px rgba(99, 102, 241, 0.7);
+        }
+
+        @keyframes avatarPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.6); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(99, 102, 241, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
+        .agent-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* Soundwave Animation */
+        .soundwave-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            height: 38px;
+            margin: 14px 0;
+        }
+
+        .wave-bar {
+            width: 5px;
+            height: 6px;
+            background: #60a5fa;
+            border-radius: 999px;
+            transition: height 0.15s ease;
+        }
+
+        .soundwave-container.active .wave-bar {
+            animation: soundwave 1s infinite ease-in-out;
+        }
+
+        .soundwave-container.active .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .soundwave-container.active .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .soundwave-container.active .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .soundwave-container.active .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .soundwave-container.active .wave-bar:nth-child(6) { animation-delay: 0.5s; }
+        .soundwave-container.active .wave-bar:nth-child(7) { animation-delay: 0.6s; }
+        .soundwave-container.active .wave-bar:nth-child(8) { animation-delay: 0.7s; }
+        .soundwave-container.active .wave-bar:nth-child(9) { animation-delay: 0.8s; }
+        .soundwave-container.active .wave-bar:nth-child(10) { animation-delay: 0.9s; }
+        .soundwave-container.active .wave-bar:nth-child(11) { animation-delay: 1.0s; }
+        .soundwave-container.active .wave-bar:nth-child(12) { animation-delay: 1.1s; }
+
+        @keyframes soundwave {
+            0%, 100% { height: 6px; opacity: 0.4; }
+            50% { height: 32px; opacity: 1; }
+        }
+
+        /* Real-time Microphone Input Level Meter */
+        .mic-meter-container {
+            width: 100%;
+            max-width: 420px;
+            margin: 8px auto 14px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .mic-meter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .mic-status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .mic-meter-track {
+            width: 100%;
+            height: 9px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mic-meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 65%, #f59e0b 85%, #ef4444 100%);
+            border-radius: 999px;
+            transition: width 0.06s ease-out;
+        }
+
+        .barge-in-badge {
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid #38bdf8;
+            color: #7dd3fc;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            /* Push/Tap to Speak Button */
+        .ptt-container {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0 6px;
+        }
+
+        .ptt-call-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            padding: 11px 24px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .ptt-call-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        }
+
+        .ptt-call-btn.recording {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35);
+            animation: pulsePtt 1.2s infinite;
+        }
+
+        @keyframes pulsePtt {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        /* Simulator Styles */
+        .sim-test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .scenario-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+        }
+
+        .scenario-card:hover {
+            border-color: #3b82f6;
+            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .scenario-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .scenario-text {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .scenario-desc {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .metrics-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Call Controls */
+        .call-actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .call-primary-btn {
+            padding: 14px 28px;
+            border-radius: 999px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .call-primary-btn.start {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .call-primary-btn.start:hover {
+            background: #059669;
+            transform: scale(1.03);
+        }
+
+        .call-primary-btn.end {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .call-primary-btn.end:hover {
+            background: #dc2626;
+            transform: scale(1.03);
+        }
+
+        .call-icon-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .call-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .call-icon-btn.active {
+            background: #3b82f6;
+            border-color: #60a5fa;
+            color: #ffffff;
+        }
+
+        .call-icon-btn.muted {
+            background: #ef4444;
+            border-color: #f87171;
+            color: #ffffff;
+        }
+
+        /* Voice Options Toolbar */
+        .call-options-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            color: #94a3b8;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .voice-select {
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Dialpad Dropdown Panel */
+        .dialpad-panel {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 16px;
+            display: none;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .dialpad-panel.open {
+            display: block;
+        }
+
+        .dialpad-display {
+            font-family: monospace;
+            font-size: 1.25rem;
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            color: #38bdf8;
+            min-height: 40px;
+            letter-spacing: 2px;
+        }
+
+        .dialpad-keys {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .dialpad-key {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dialpad-key span {
+            font-size: 0.65rem;
+            font-weight: normal;
+            color: #94a3b8;
+        }
+
+        .dialpad-key:hover {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+
+        .dialpad-key:active {
+            background: #2563eb;
+            transform: scale(0.95);
+        }
+
+        /* Dialer Simulator Styles */
+        .simulator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 768px) {
+            .simulator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sim-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sim-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .sim-card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #ffffff;
+        }
+
+        .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* Extension Directory Display */
+        .extensions-section {
+            margin-top: 24px;
+        }
+
+        .section-header {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ext-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ext-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: border-color 0.2s;
+        }
+
+        .ext-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .ext-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .ext-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+
+        .ext-sip {
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .ext-test-btn {
+            margin-top: 6px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .ext-test-btn:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* API Integration Guide & Code Snippets */
+        .code-card {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .endpoint-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .method-badge {
+            background: #10b981;
+            color: white;
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .endpoint-url {
+            font-family: monospace;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title-row">
+                <h1>🤖 AI Call Assistant</h1>
+                <span class="badge-live">Telephony & Dialer Ready</span>
+            </div>
+            <p class="subtitle">AI Voice Agent with Automated Greetings, Extension Transfers & Dialer Webhooks</p>
+
+            <!-- Tabs -->
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('voice-tab')">🎙️ Live Voice Assistant</button>
+                <button class="tab-btn" onclick="switchTab('dialer-tab')">📞 Dialer Simulator & PBX</button>
+                <button class="tab-btn" onclick="switchTab('api-tab')">🔌 Dialer API & Webhooks</button>
+            </div>
+        </div>
+
+        <div class="content-body">
+            <!-- TAB 1: AI AGENT VOICE CALLING -->
+            <div id="voice-tab" class="tab-content active">
+                
+                <!-- Main Phone Call Stage Card -->
+                <div class="call-card">
+                    <div class="call-top-bar">
+                        <div id="callStatusBadge" class="call-status-badge">
+                            <span id="callStatusDot">⚪</span>
+                            <span id="callStatusText">Ready to Call</span>
+                        </div>
+                        <div id="callTimer" class="call-timer">00:00</div>
+                    </div>
+
+                    <div class="call-avatar-row">
+                        <div id="agentAvatar" class="agent-avatar-wrap">
+                            <span>🤖</span>
+                        </div>
+                        <div class="agent-name">Alex <span style="color:#38bdf8; font-size:0.9rem;">✓ AI Phone Agent</span></div>
+                        <div id="agentSubtext" class="agent-desc">Real-Time Voice Assistant • Speaks Naturally & Answers Anything</div>
+                    </div>
+
+                    <!-- Dynamic Soundwave Visualizer -->
+                    <div id="soundwave" class="soundwave-container">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                    </div>
+
+                    <!-- Real-time Live Microphone Input Level Meter -->
+                    <div class="mic-meter-container">
+                        <div class="mic-meter-header">
+                            <span class="mic-status-pill">
+                                <span id="micIconIndicator">🎤</span>
+                                <span id="micStatusText">Microphone: Ready (Press Start Voice Call)</span>
+                            </span>
+                            <span id="bargeInBadge" class="barge-in-badge" style="display:none;">Barge-In Ready</span>
+                        </div>
+                        <div class="mic-meter-track" title="Real-time Microphone Audio Input Volume Level">
+                            <div id="micMeterFill" class="mic-meter-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Primary In-Call Controls -->
+                    <div class="call-actions-row">
+                        <!-- Main Call / Hang Up Button -->
+                        <button id="callToggleBtn" class="call-primary-btn start" onclick="toggleVoiceCall()">
+                            <span>📞</span> <span id="callBtnText">Start Voice Call</span>
+                        </button>
+
+                        <!-- Hands-Free Mic Toggle -->
+                        <button id="handsfreeBtn" class="call-icon-btn active" title="Hands-Free Continuous Voice Conversation" onclick="toggleHandsfree()">
+                            🎙️
+                        </button>
+
+                        <!-- Mute Mic -->
+                        <button id="muteBtn" class="call-icon-btn" title="Mute Microphone" onclick="toggleMute()">
+                            🎤
+                        </button>
+
+                        <!-- Speaker Toggle -->
+                        <button id="speakerBtn" class="call-icon-btn active" title="Speaker Audio" onclick="toggleSpeaker()">
+                            🔊
+                        </button>
+
+                        <!-- Keypad Toggle -->
+                        <button id="keypadBtn" class="call-icon-btn" title="Phone Dialpad" onclick="toggleKeypad()">
+                            🔢
+                        </button>
+                    </div>
+
+                    <!-- Direct Push / Tap to Speak Button -->
+                    <div class="ptt-container" id="pttWrapper">
+                        <button id="pttBtn" class="ptt-call-btn" type="button" onclick="togglePushToTalk()">
+                            <span id="pttIcon">🎙️</span> <span id="pttText">Tap or Hold to Speak</span>
+                        </button>
+                    </div>
+
+                    <!-- Options Bar: Voice Selector & Handsfree indicator -->
+                    <div class="call-options-bar">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span>Agent Voice:</span>
+                            <select id="voiceSelect" class="voice-select">
+                                <option value="en-US-JennyNeural" selected>Jenny (Warm & Natural)</option>
+                                <option value="en-US-GuyNeural">Guy (Professional Male)</option>
+                                <option value="en-US-AriaNeural">Aria (Expressive)</option>
+                            </select>
+                        </div>
+                        <div id="handsfreeIndicator" style="display:flex; align-items:center; gap:6px; color:#34d399; font-weight:600; font-size:0.8rem;">
+                            <span>●</span> Hands-Free Mode Active (Continuous Speech)
+                        </div>
+                    </div>
+
+                    <!-- Collapsible DTMF Dialpad -->
+                    <div id="dialpadPanel" class="dialpad-panel">
+                        <div id="dialpadDisplay" class="dialpad-display">_</div>
+                        <div class="dialpad-keys">
+                            <button class="dialpad-key" onclick="pressDtmfKey('1')">1<span>&nbsp;</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('2')">2<span>ABC</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('3')">3<span>DEF</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('4')">4<span>GHI</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('5')">5<span>JKL</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('6')">6<span>MNO</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('7')">7<span>PQRS</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('8')">8<span>TUV</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('9')">9<span>WXYZ</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('*')">*<span>&nbsp;</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('0')">0<span>+</span></button>
+                            <button class="dialpad-key" onclick="pressDtmfKey('#')">#<span>&nbsp;</span></button>
+                        </div>
+                        <div style="display:flex; gap:8px; margin-top:10px;">
+                            <button class="chip-btn" style="flex:1;" onclick="clearDialpad()">Clear</button>
+                            <button class="btn-primary" style="flex:1; padding:8px;" onclick="sendDialedDtmf()">Route DTMF</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="status" class="status idle" style="display:none;">Ready to listen</div>
+
+                <!-- Text or Push-to-Talk Bar (Complementary) -->
+                <div class="text-input-section">
+                    <form id="textForm" class="text-input-form">
+                        <input type="text" id="textInput" class="text-input" placeholder="Type a question or message to Alex..." autocomplete="off" />
+                        <button type="submit" id="sendBtn" class="send-btn">Send 💬</button>
+                        <button type="button" id="recordBtn" class="action-btn record-btn" style="flex:0 0 auto; padding:10px 16px; font-size:0.9rem;" title="Single-Turn Push to Talk">🎤 Mic</button>
+                        <button type="button" id="resetBtn" class="action-btn reset-btn" style="flex:0 0 auto; padding:10px 16px; font-size:0.9rem;">🔄 Reset</button>
+                    </form>
+                    <div class="quick-prompts">
+                        <span class="quick-prompt-label">Try Asking:</span>
+                        <button type="button" class="chip-btn" data-prompt="What is the capital of Australia, and what is interesting about it?">🌏 Capital of Australia</button>
+                        <button type="button" class="chip-btn" data-prompt="Can you explain how airplanes stay up in the sky in simple terms?">✈️ How airplanes fly</button>
+                        <button type="button" class="chip-btn" data-prompt="What is a fifteen percent tip on eighty-four dollars?">🧮 Tip calculation</button>
+                        <button type="button" class="chip-btn" data-prompt="Can you connect me to billing and payments department?">💰 Connect to Billing</button>
+                        <button type="button" class="chip-btn" data-prompt="What are your business hours this week?">🕒 Business Hours</button>
+                    </div>
+                </div>
+
+                <!-- Live Call Conversation Transcript -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-weight:700; font-size:0.95rem; color:#1e293b;">📜 Live Call Transcript</span>
+                    <span style="font-size:0.8rem; color:#64748b;">Updated in real time</span>
+                </div>
+                <div id="conversation" class="conversation">
+                    <div class="message bot">
+                        <div class="message-label">🤖 Alex (AI Agent)</div>
+                        <div class="message-text">Hello! I'm Alex, your AI voice calling agent. Press "Start Voice Call" or ask me anything—I can answer any general questions, help with accounts, or connect you to any department.</div>
+                    </div>
+                </div>
+
+                <div id="error" class="error"></div>
+            </div>
+
+            <!-- TAB 2: DIALER SOFTWARE SIMULATOR -->
+            <div id="dialer-tab" class="tab-content">
+                <div class="simulator-grid">
+                    <!-- Inbound Call Simulator -->
+                    <div class="sim-card">
+                        <div class="sim-card-header">
+                            <span class="sim-card-title">📥 Inbound Call Simulator</span>
+                            <span class="badge-live" style="background:#e0f2fe; color:#0284c7; border:none;">PBX Inbound</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Caller Phone Number (ANI)</label>
+                            <input type="text" id="inboundCallerId" class="form-control" value="+1 (555) 345-6789" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Welcome Greeting</label>
+                            <input type="text" id="inboundGreeting" class="form-control" value="Thank you for calling Customer Support. I am your automated AI assistant. How can I help you today?" />
+                        </div>
+                        <button class="btn-primary" onclick="simulateInboundCall()">
+                            📞 Simulate Inbound Call
+                        </button>
+                    </div>
+
+                    <!-- Outbound AI Agent Calling Simulator -->
+                    <div class="sim-card">
+                        <div class="sim-card-header">
+                            <span class="sim-card-title">📤 Outbound AI Agent Calling</span>
+                            <span class="badge-live" style="background:#fef3c7; color:#d97706; border:none;">Dialer Campaign</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" id="outboundName" class="form-control" value="Sarah Jenkins" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Destination Number</label>
+                            <input type="text" id="outboundPhone" class="form-control" value="+1 (555) 789-0123" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Campaign Type</label>
+                            <select id="outboundCampaign" class="form-control">
+                                <option value="Payment Reminder">Payment Reminder</option>
+                                <option value="Appointment Confirmation">Appointment Confirmation</option>
+                                <option value="Account Follow-up" selected>Account Follow-up</option>
+                                <option value="Customer Satisfaction Survey">Customer Satisfaction Survey</option>
+                            </select>
+                        </div>
+                        <button class="btn-success" onclick="simulateOutboundCall()">
+                            🚀 Launch Outbound Agent Call
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Extensions PBX Board -->
+                <div class="extensions-section">
+                    <div class="section-header">
+                        <span>🏢 Configured Agent Extension Directory</span>
+                        <span style="font-size: 0.85rem; font-weight: normal; color: #64748b;">Auto-detected and routed via speech</span>
+                    </div>
+                    <div id="extContainer" class="ext-grid">
+                        <!-- Loaded dynamically via loadExtensions() -->
+                    </div>
+                </div>
+
+                <!-- Call Session Monitor -->
+                <div class="extensions-section">
+                    <div class="section-header">
+                        <span>📊 Recent Dialer Call Sessions</span>
+                        <button class="chip-btn" onclick="loadRecentCalls()">🔄 Refresh Calls</button>
+                    </div>
+                    <div id="recentCallsContainer" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; font-size:0.85rem;">
+                        Loading recent dialer calls...
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DIALER API & WEBHOOKS -->
+            <div id="api-tab" class="tab-content">
+                <p style="margin-bottom: 16px; color:#475569; font-size: 0.95rem;">
+                    Integrate your dialer software (Vicidial, Asterisk, FreePBX, Twilio, Plivo, Telnyx, or custom SIP media server) directly into this AI Call Assistant using the standardized REST endpoints and TwiML voice webhooks below.
+                </p>
+
+                <!-- Interactive Webhook Simulator & Scenario Tester -->
+                <div class="extensions-section" style="background:#f8fafc; border:2px solid #3b82f6; border-radius:16px; padding:20px; margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <span style="font-weight:800; font-size:1.1rem; color:#1e293b;">🧪 Interactive Webhook Call Simulator</span>
+                            <div style="font-size:0.8rem; color:#64748b;">Simulate live PBX telephony turns through the /api/webhook contract with real-time latency metrics</div>
+                        </div>
+                        <span class="badge-live" style="background:#dbeafe; color:#1d4ed8; border-color:#93c5fd;">Webhook Contract v1.0</span>
+                    </div>
+
+                    <div class="sim-test-grid">
+                        <div class="scenario-card" onclick="runWebSimulator('What is the speed of light in vacuum?')">
+                            <span class="scenario-tag">Scenario 1: General Knowledge</span>
+                            <span class="scenario-text">"What is the speed of light?"</span>
+                            <span class="scenario-desc">Tests factual 1-2 sentence spoken reply under 1.5s</span>
+                        </div>
+                        <div class="scenario-card" onclick="runWebSimulator('Can you please transfer my call to the billing department?')">
+                            <span class="scenario-tag">Scenario 2: Department Transfer</span>
+                            <span class="scenario-text">"Transfer to Billing"</span>
+                            <span class="scenario-desc">Tests routing to Extension 102 (Billing & Payments)</span>
+                        </div>
+                        <div class="scenario-card" onclick="runWebSimulator('This service is completely unacceptable, get me your manager right now!')">
+                            <span class="scenario-tag" style="background:#fee2e2; color:#b91c1c;">Scenario 3: Angry Escalation</span>
+                            <span class="scenario-text">"Get me your manager right now!"</span>
+                            <span class="scenario-desc">Tests supervisor escalation to Extension 200</span>
+                        </div>
+                        <div class="scenario-card" onclick="runWebSimulator('Stop calling me and remove my phone number from your list.')">
+                            <span class="scenario-tag" style="background:#fef3c7; color:#b45309;">Scenario 4: DNC Compliance</span>
+                            <span class="scenario-text">"Remove my number immediately"</span>
+                            <span class="scenario-desc">Tests Do Not Call (DNC) hangup disposition</span>
+                        </div>
+                    </div>
+
+                    <!-- Simulator Live Inspector -->
+                    <div style="background:#0f172a; border-radius:12px; padding:14px; color:#f8fafc; font-family:monospace; font-size:0.85rem; max-height:260px; overflow-y:auto;" id="simInspector">
+                        <span style="color:#64748b;">// Click any scenario above to test the webhook contract live...</span>
+                    </div>
+                </div>
+
+                <!-- 1. Initiate Call API -->
+                <div class="section-header" style="font-size: 0.95rem;">
+                    <span>1. Initiate Inbound or Outbound Call Session</span>
+                </div>
+                <div class="code-card">
+                    <button class="copy-btn" onclick="copySnippet('curl-start')">Copy</button>
+                    <pre id="curl-start">curl -X POST https://ais-pre-uyi5mhe62n4gltsgek6tso-893275087870.asia-southeast1.run.app/api/dialer/call/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "direction": "outbound",
+    "caller_id": "+15551234567",
+    "customer_name": "John Doe",
+    "campaign": "Account Review",
+    "custom_greeting": "Hello John, this is an automated update regarding your account."
+  }'</pre>
+                </div>
+
+                <!-- 2. Call Interaction API -->
+                <div class="section-header" style="font-size: 0.95rem;">
+                    <span>2. Process Caller Speech / Interaction with Auto-Transfer</span>
+                </div>
+                <div class="code-card">
+                    <button class="copy-btn" onclick="copySnippet('curl-interact')">Copy</button>
+                    <pre id="curl-interact">curl -X POST https://ais-pre-uyi5mhe62n4gltsgek6tso-893275087870.asia-southeast1.run.app/api/dialer/call/interact \
+  -H "Content-Type: application/json" \
+  -d '{
+    "call_id": "call-12345",
+    "text": "I have an issue with my bill, please transfer me to billing"
+  }'
+
+# Response automatically returns extension routing:
+# {
+#   "action": "transfer",
+#   "response": "Certainly. I am transferring your call to Billing & Payments on extension 102.",
+#   "transfer": { "extension": "102", "name": "Billing & Payments", "sip_uri": "sip:102@pbx.local" }
+# }</pre>
+                </div>
+
+                <!-- 3. Telephony TwiML Webhook -->
+                <div class="section-header" style="font-size: 0.95rem;">
+                    <span>3. Twilio / Asterisk / FreePBX Voice Webhook (TwiML / XML)</span>
+                </div>
+                <div class="code-card">
+                    <button class="copy-btn" onclick="copySnippet('curl-twiml')">Copy</button>
+                    <pre id="curl-twiml"># Webhook URL to paste in your Twilio Phone Number Voice URL or FreePBX Trunk:
+https://ais-pre-uyi5mhe62n4gltsgek6tso-893275087870.asia-southeast1.run.app/api/dialer/telephony/twiml
+
+# Generates clean TwiML with Edge Neural TTS and speech gather:
+# <Response>
+#   <Play>https://.../greeting.mp3</Play>
+#   <Gather input="speech" action="/api/dialer/telephony/gather" speechTimeout="auto" />
+# </Response></pre>
+                </div>
+
+                <!-- 4. Python Integration Snippet -->
+                <div class="section-header" style="font-size: 0.95rem;">
+                    <span>4. Python Dialer Integration Snippet</span>
+                </div>
+                <div class="code-card">
+                    <button class="copy-btn" onclick="copySnippet('python-snippet')">Copy</button>
+                    <pre id="python-snippet">import requests
+
+BASE_URL = "https://ais-pre-uyi5mhe62n4gltsgek6tso-893275087870.asia-southeast1.run.app"
+
+# Start Outbound Call
+session = requests.post(f"{BASE_URL}/api/dialer/call/start", json={
+    "direction": "outbound",
+    "customer_name": "Michael Vance",
+    "campaign": "Payment Reminder"
+}).json()
+
+print(f"Call ID: {session['call_id']}")
+print(f"Greeting Audio: {BASE_URL}{session['audio_url']}")
+
+# Send User Audio/Text and Check for Transfer
+reply = requests.post(f"{BASE_URL}/api/dialer/call/interact", json={
+    "call_id": session['call_id'],
+    "text": "Can you transfer me to an agent?"
+}).json()
+
+if reply["action"] == "transfer":
+    target_ext = reply["transfer"]["extension"]
+    print(f"Bridge call to SIP Extension: {target_ext} ({reply['transfer']['sip_uri']})")</pre>
+                </div>
+            </div>
+
+            <div class="footer">
+                Powered by Gemini 3.5/3.8 Flash • Edge Neural TTS • Web Speech Recognition • PBX Extension Routing
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State variables for AI Voice Calling
+        let isInCall = false;
+        let isHandsfree = true;
+        let isMuted = false;
+        let isSpeakerOn = true;
+        let isKeypadOpen = false;
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recognition = null;
+        let recognizedSpeechText = '';
+        let currentCallId = 'call-' + Date.now();
+        let callTimerInterval = null;
+        let callSeconds = 0;
+        let dialedDtmfDigits = '';
+        let audioCtx = null;
+        let ringOsc1 = null;
+        let ringOsc2 = null;
+        let ringGain = null;
+        let currentAudioPlayer = null;
+        let currentCallAudio = null;
+        let silenceTimer = null;
+
+        // Enhanced Microphone & Audio Streaming Variables
+        let activeMicStream = null;
+        let micAnalyser = null;
+        let micAnimFrame = null;
+        let isAgentSpeaking = false;
+        let agentSpeechStartTime = 0;
+        let isCommittingTurn = false;
+        let userSpeechDuration = 0;
+        let isPttRecording = false;
+        let isUserCurrentlySpeaking = false;
+        let lastVoiceDetectedTime = 0;
+        let recordedTurnAudioChunks = [];
+        let continuousMediaRecorder = null;
+
+        // DOM Elements
+        const callToggleBtn = document.getElementById('callToggleBtn');
+        const callBtnText = document.getElementById('callBtnText');
+        const callStatusBadge = document.getElementById('callStatusBadge');
+        const callStatusDot = document.getElementById('callStatusDot');
+        const callStatusText = document.getElementById('callStatusText');
+        const callTimer = document.getElementById('callTimer');
+        const agentAvatar = document.getElementById('agentAvatar');
+        const agentSubtext = document.getElementById('agentSubtext');
+        const soundwave = document.getElementById('soundwave');
+        const handsfreeBtn = document.getElementById('handsfreeBtn');
+        const handsfreeIndicator = document.getElementById('handsfreeIndicator');
+        const muteBtn = document.getElementById('muteBtn');
+        const speakerBtn = document.getElementById('speakerBtn');
+        const keypadBtn = document.getElementById('keypadBtn');
+        const dialpadPanel = document.getElementById('dialpadPanel');
+        const dialpadDisplay = document.getElementById('dialpadDisplay');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const recordBtn = document.getElementById('recordBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusDiv = document.getElementById('status');
+        const conversationDiv = document.getElementById('conversation');
+        const errorDiv = document.getElementById('error');
+        const textForm = document.getElementById('textForm');
+        const textInput = document.getElementById('textInput');
+        const chipBtns = document.querySelectorAll('.chip-btn');
+        const micIconIndicator = document.getElementById('micIconIndicator');
+        const micStatusText = document.getElementById('micStatusText');
+        const bargeInBadge = document.getElementById('bargeInBadge');
+        const micMeterFill = document.getElementById('micMeterFill');
+
+        // Audio Context initialization on user gesture
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtxClass) {
+                    audioCtx = new AudioCtxClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Live Microphone Stream & Level Monitor Setup
+        async function initMicrophone() {
+            if (activeMicStream && activeMicStream.active) {
+                return activeMicStream;
+            }
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('getUserMedia not supported in this browser.');
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                activeMicStream = stream;
+                setupMicAudioNodes(stream);
+                if (micStatusText) {
+                    micStatusText.textContent = 'Microphone: Connected & Ready';
+                    micStatusText.style.color = '#34d399';
+                }
+                return stream;
+            } catch (err) {
+                console.error('Microphone access failed:', err);
+                if (micStatusText) {
+                    micStatusText.textContent = 'Microphone: Permission Blocked / Not Found ❌';
+                    micStatusText.style.color = '#ef4444';
+                }
+                showError('Microphone permission required. Please allow microphone access in your browser to speak with Alex.');
+                return null;
+            }
+        }
+
+        function setupMicAudioNodes(stream) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const source = ctx.createMediaStreamSource(stream);
+                micAnalyser = ctx.createAnalyser();
+                micAnalyser.fftSize = 256;
+                source.connect(micAnalyser);
+                startMicMeterLoop();
+            } catch (e) {
+                console.warn('AudioNodes setup error:', e);
+            }
+        }
+
+        function startMicMeterLoop() {
+            if (!micAnalyser) return;
+            const dataArray = new Uint8Array(micAnalyser.frequencyBinCount);
+
+            function updateMeter() {
+                if (!isInCall && !isRecording) {
+                    if (micMeterFill) micMeterFill.style.width = '0%';
+                    return;
+                }
+
+                micAnalyser.getByteTimeDomainData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) {
+                    const v = (dataArray[i] - 128) / 128;
+                    sum += v * v;
+                }
+                const rms = Math.sqrt(sum / dataArray.length);
+                const pct = Math.min(100, Math.round(rms * 450));
+                if (micMeterFill) micMeterFill.style.width = `${pct}%`;
+
+                // Barge-In detection: caller speaks over Alex (debounced by 1200ms to avoid echo)
+                const agentSpokenTime = Date.now() - agentSpeechStartTime;
+                if (isAgentSpeaking && agentSpokenTime > 1200 && rms > 0.08) {
+                    triggerBargeIn();
+                }
+
+                // Voice Activity Detection (VAD)
+                if (rms > 0.032) {
+                    lastVoiceDetectedTime = Date.now();
+                    userSpeechDuration += 16;
+                    if (!isUserCurrentlySpeaking && !isAgentSpeaking) {
+                        isUserCurrentlySpeaking = true;
+                        setWaveState('caller-speaking');
+                        if (micStatusText) {
+                            micStatusText.textContent = '🎙️ Hearing your voice (speaking...)';
+                            micStatusText.style.color = '#34d399';
+                        }
+                    }
+                } else if (isUserCurrentlySpeaking && Date.now() - lastVoiceDetectedTime > 700) {
+                    // Silence detected after speech
+                    isUserCurrentlySpeaking = false;
+                    if (micStatusText && !isAgentSpeaking) {
+                        micStatusText.textContent = 'Microphone: Active (Processing speech...)';
+                        micStatusText.style.color = '#38bdf8';
+                    }
+                    if (userSpeechDuration > 200 && !isAgentSpeaking && !isCommittingTurn) {
+                        userSpeechDuration = 0;
+                        commitUserSpeechTurn();
+                    }
+                }
+
+                micAnimFrame = requestAnimationFrame(updateMeter);
+            }
+
+            cancelAnimationFrame(micAnimFrame);
+            micAnimFrame = requestAnimationFrame(updateMeter);
+        }
+
+        // Barge-In: Caller interrupts Alex while speaking
+        function triggerBargeIn() {
+            if (!isAgentSpeaking) return;
+            console.log('🚨 Barge-in: Caller interrupted AI agent speech');
+            stopSpeechAudio();
+            isAgentSpeaking = false;
+            setWaveState('caller-speaking');
+            if (bargeInBadge) {
+                bargeInBadge.style.display = 'inline-block';
+                bargeInBadge.textContent = 'Barge-In Interrupted!';
+                setTimeout(() => { if (bargeInBadge) bargeInBadge.style.display = 'none'; }, 2000);
+            }
+            fetch('/api/webhook/barge-in', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ call_id: currentCallId })
+            }).catch(() => {});
+            startHandsfreeListening();
+        }
+
+        // Realistic telephone ringback tone generator (440Hz + 480Hz modulated)
+        function startRingbackTone() {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                stopRingbackTone();
+
+                ringGain = ctx.createGain();
+                ringGain.gain.setValueAtTime(0.08, ctx.currentTime);
+                ringGain.connect(ctx.destination);
+
+                ringOsc1 = ctx.createOscillator();
+                ringOsc2 = ctx.createOscillator();
+                ringOsc1.type = 'sine';
+                ringOsc2.type = 'sine';
+                ringOsc1.frequency.setValueAtTime(440, ctx.currentTime);
+                ringOsc2.frequency.setValueAtTime(480, ctx.currentTime);
+
+                ringOsc1.connect(ringGain);
+                ringOsc2.connect(ringGain);
+                ringOsc1.start();
+                ringOsc2.start();
+            } catch (e) {
+                console.warn('Ringback audio error:', e);
+            }
+        }
+
+        function stopRingbackTone() {
+            try {
+                if (ringOsc1) { ringOsc1.stop(); ringOsc1.disconnect(); ringOsc1 = null; }
+                if (ringOsc2) { ringOsc2.stop(); ringOsc2.disconnect(); ringOsc2 = null; }
+                if (ringGain) { ringGain.disconnect(); ringGain = null; }
+            } catch (e) {}
+        }
+
+        // Realistic DTMF dual-frequency telephone keypad sound
+        function playDtmfTone(key) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const dtmfFreqs = {
+                    '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+                    '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+                    '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+                    '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+                };
+
+                const freqs = dtmfFreqs[key];
+                if (!freqs) return;
+
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                osc1.frequency.setValueAtTime(freqs[0], ctx.currentTime);
+                osc2.frequency.setValueAtTime(freqs[1], ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc1.start();
+                osc2.start();
+                osc1.stop(ctx.currentTime + 0.18);
+                osc2.stop(ctx.currentTime + 0.18);
+            } catch (e) {
+                console.warn('DTMF audio error:', e);
+            }
+        }
+
+        // Call connect click effect
+        function playCallChime(isConnect = true) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(isConnect ? 587.33 : 329.63, ctx.currentTime);
+                if (isConnect) {
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                }
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch (e) {}
+        }
+
+        // Call Timer formatting
+        function updateCallTimerDisplay() {
+            const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+            const secs = String(callSeconds % 60).padStart(2, '0');
+            callTimer.textContent = `${mins}:${secs}`;
+        }
+
+        function startCallTimer() {
+            clearInterval(callTimerInterval);
+            callSeconds = 0;
+            updateCallTimerDisplay();
+            callTimerInterval = setInterval(() => {
+                callSeconds++;
+                updateCallTimerDisplay();
+            }, 1000);
+        }
+
+        function stopCallTimer() {
+            clearInterval(callTimerInterval);
+        }
+
+        // Visualizer wave state
+        function setWaveState(state) {
+            // state: 'off' | 'agent-speaking' | 'caller-speaking' | 'thinking'
+            if (state === 'off') {
+                soundwave.classList.remove('active');
+                agentAvatar.classList.remove('talking');
+                soundwave.querySelectorAll('.wave-bar').forEach(b => {
+                    b.style.height = '6px';
+                    b.style.background = '#60a5fa';
+                });
+            } else if (state === 'agent-speaking') {
+                soundwave.classList.add('active');
+                agentAvatar.classList.add('talking');
+                soundwave.querySelectorAll('.wave-bar').forEach(b => b.style.background = '#38bdf8');
+            } else if (state === 'caller-speaking') {
+                soundwave.classList.add('active');
+                agentAvatar.classList.remove('talking');
+                soundwave.querySelectorAll('.wave-bar').forEach(b => b.style.background = '#34d399');
+            } else if (state === 'thinking') {
+                soundwave.classList.add('active');
+                agentAvatar.classList.remove('talking');
+                soundwave.querySelectorAll('.wave-bar').forEach(b => b.style.background = '#fbbf24');
+            }
+        }
+
+        // Toggle Main Voice Call Session
+        async function toggleVoiceCall() {
+            if (!isInCall) {
+                await startVoiceCall();
+            } else {
+                endVoiceCall();
+            }
+        }
+
+        async function startVoiceCall() {
+            try {
+                errorDiv.style.display = 'none';
+                getAudioContext();
+
+                // Explicitly request microphone permissions first so audio capture is ready!
+                const micStream = await initMicrophone();
+                if (!micStream) {
+                    return; // initMicrophone shows clear guidance
+                }
+
+                // UI: Dialing
+                callStatusBadge.className = 'call-status-badge ringing';
+                callStatusDot.textContent = '🟡';
+                callStatusText.textContent = 'Calling Alex...';
+                callBtnText.textContent = 'Connecting...';
+                agentSubtext.textContent = 'Dialing AI voice agent... (Ringing)';
+                startRingbackTone();
+
+                currentCallId = `call-${Date.now()}`;
+                const chosenVoice = voiceSelect ? voiceSelect.value : 'en-US-JennyNeural';
+
+                // Call backend start endpoint
+                const res = await fetch('/api/dialer/call/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        call_id: currentCallId,
+                        direction: 'inbound',
+                        voice: chosenVoice
+                    })
+                });
+
+                const data = await res.json();
+                stopRingbackTone();
+                playCallChime(true);
+
+                // Connected!
+                isInCall = true;
+                callToggleBtn.className = 'call-primary-btn end';
+                callToggleBtn.innerHTML = '<span>🔴</span> <span id="callBtnText">End Call</span>';
+                callStatusBadge.className = 'call-status-badge in-call';
+                callStatusDot.textContent = '🟢';
+                callStatusText.textContent = 'In Call with Alex';
+                agentSubtext.textContent = 'Active Live Phone Call • High Fidelity Audio';
+                if (micStatusText) {
+                    micStatusText.textContent = 'Microphone: Active & Streaming';
+                    micStatusText.style.color = '#34d399';
+                }
+                startCallTimer();
+
+                const greetingText = data.greeting || "Hello! I'm Alex, your AI voice assistant. What can I help you with today?";
+                addMessage('bot', greetingText, data.audio_url);
+
+                // Play greeting speech
+                await playVoiceResponse(greetingText, data.audio_url);
+
+                // After greeting completes, start listening automatically in hands-free mode
+                if (isInCall && isHandsfree && !isMuted) {
+                    startHandsfreeListening();
+                }
+            } catch (err) {
+                console.error('Call connection error:', err);
+                stopRingbackTone();
+                showError('Could not connect call. Please check your connection and try again.');
+                endVoiceCall();
+            }
+        }
+
+        function endVoiceCall(reason = 'Caller ended the call') {
+            isInCall = false;
+            stopRingbackTone();
+            stopCallTimer();
+            stopSpeechAudio();
+            stopHandsfreeListening();
+            playCallChime(false);
+
+            if (micMeterFill) micMeterFill.style.width = '0%';
+            if (micStatusText) {
+                micStatusText.textContent = 'Microphone: Standby';
+                micStatusText.style.color = '#94a3b8';
+            }
+
+            callToggleBtn.className = 'call-primary-btn start';
+            callToggleBtn.innerHTML = '<span>📞</span> <span id="callBtnText">Start Voice Call</span>';
+            callStatusBadge.className = 'call-status-badge';
+            callStatusDot.textContent = '⚪';
+            callStatusText.textContent = 'Call Ended';
+            agentSubtext.textContent = 'Call disconnected. Press "Start Voice Call" to reconnect.';
+            setWaveState('off');
+
+            fetch('/api/dialer/call/end', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ call_id: currentCallId, disposition: reason })
+            }).catch(() => {});
+
+            // Add call log summary
+            const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+            const secs = String(callSeconds % 60).padStart(2, '0');
+            const callSummaryDiv = document.createElement('div');
+            callSummaryDiv.className = 'message transfer';
+            callSummaryDiv.innerHTML = `
+                <div class="transfer-banner" style="background:#f1f5f9; border-color:#94a3b8; color:#334155;">
+                    <div class="icon">📴</div>
+                    <div class="details">
+                        <div class="title" style="color:#0f172a;">Call Summary: ${mins}:${secs}</div>
+                        <div class="sip-info">Duration: ${callSeconds} seconds • Session ID: ${currentCallId}</div>
+                    </div>
+                </div>
+            `;
+            conversationDiv.appendChild(callSummaryDiv);
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        }
+
+        // Direct Push / Tap to Speak Button Handler
+        function togglePushToTalk() {
+            if (!isInCall) {
+                startVoiceCall();
+                return;
+            }
+            const pttBtn = document.getElementById('pttBtn');
+            const pttText = document.getElementById('pttText');
+
+            if (!isPttRecording) {
+                isPttRecording = true;
+                if (pttBtn) pttBtn.classList.add('recording');
+                if (pttText) pttText.textContent = '🔴 Speaking... (Tap when done)';
+                setWaveState('caller-speaking');
+                callStatusText.textContent = '🎙️ Recording your voice...';
+                if (micStatusText) {
+                    micStatusText.textContent = 'Microphone: Recording your speech...';
+                    micStatusText.style.color = '#ef4444';
+                }
+                startHandsfreeListening();
+            } else {
+                isPttRecording = false;
+                if (pttBtn) pttBtn.classList.remove('recording');
+                if (pttText) pttText.textContent = '🎙️ Tap or Hold to Speak';
+                commitUserSpeechTurn();
+            }
+        }
+
+        // Commit Caller Turn (dispatches captured speech text or audio buffer)
+        async function commitUserSpeechTurn() {
+            if (!isInCall || isAgentSpeaking || isCommittingTurn) return;
+            isCommittingTurn = true;
+            clearTimeout(silenceTimer);
+
+            const textTurn = recognizedSpeechText.trim();
+            recognizedSpeechText = '';
+
+            if (textTurn) {
+                if (recognition) {
+                    try { recognition.abort(); } catch (e) {}
+                }
+                try {
+                    await handleVoiceTurn(textTurn);
+                } finally {
+                    isCommittingTurn = false;
+                }
+                return;
+            }
+
+            // Fallback: commit recorded audio slices to Gemini Multimodal ASR
+            if (continuousMediaRecorder && continuousMediaRecorder.state !== 'inactive') {
+                try { continuousMediaRecorder.stop(); } catch (e) {}
+            }
+
+            setTimeout(async () => {
+                try {
+                    if (recordedTurnAudioChunks.length > 0 && isInCall) {
+                        const blobType = recordedTurnAudioChunks[0]?.type || 'audio/webm';
+                        const audioBlob = new Blob(recordedTurnAudioChunks, { type: blobType });
+                        recordedTurnAudioChunks = [];
+                        if (audioBlob.size > 400) {
+                            await sendAudioToServer(audioBlob);
+                        } else if (isInCall && isHandsfree && !isMuted) {
+                            startHandsfreeListening();
+                        }
+                    } else if (isInCall && isHandsfree && !isMuted) {
+                        startHandsfreeListening();
+                    }
+                } finally {
+                    isCommittingTurn = false;
+                }
+            }, 80);
+        }
+
+        // Dual-Engine Hands-Free Voice Loop (Web Speech API + Continuous MediaRecorder fallback)
+        function startHandsfreeListening() {
+            if (!isInCall || isMuted || isAgentSpeaking || isCommittingTurn) return;
+
+            setWaveState('caller-speaking');
+            callStatusText.textContent = '🎙️ Listening to you...';
+            if (micStatusText) {
+                micStatusText.textContent = 'Microphone: Listening for your voice...';
+                micStatusText.style.color = '#38bdf8';
+            }
+            recognizedSpeechText = '';
+            recordedTurnAudioChunks = [];
+
+            // Continuous background MediaRecorder captures audio slices for Gemini ASR
+            if (activeMicStream && activeMicStream.active) {
+                try {
+                    let mimeType = '';
+                    if (typeof MediaRecorder.isTypeSupported === 'function') {
+                        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+                        else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+                        else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+                        else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+                    }
+                    if (continuousMediaRecorder && continuousMediaRecorder.state !== 'inactive') {
+                        try { continuousMediaRecorder.stop(); } catch (e) {}
+                    }
+                    continuousMediaRecorder = mimeType ? new MediaRecorder(activeMicStream, { mimeType }) : new MediaRecorder(activeMicStream);
+                    continuousMediaRecorder.ondataavailable = (e) => {
+                        if (e.data && e.data.size > 0) {
+                            recordedTurnAudioChunks.push(e.data);
+                        }
+                    };
+                    continuousMediaRecorder.start(200);
+                } catch (recErr) {
+                    console.warn('Continuous MediaRecorder start notice:', recErr);
+                }
+            }
+
+            // Web Speech API for real-time instantaneous transcription
+            const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognitionClass) {
+                try {
+                    if (recognition) {
+                        try { recognition.abort(); } catch (e) {}
+                    }
+                    recognition = new SpeechRecognitionClass();
+                    recognition.continuous = false;
+                    recognition.interimResults = true;
+                    recognition.lang = 'en-US';
+
+                    recognition.onresult = (event) => {
+                        let interim = '';
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                                recognizedSpeechText += event.results[i][0].transcript + ' ';
+                            } else {
+                                interim += event.results[i][0].transcript;
+                            }
+                        }
+                        const currentHeard = (recognizedSpeechText + ' ' + interim).trim();
+                        if (currentHeard) {
+                            agentSubtext.textContent = `Heard: "${currentHeard}"`;
+                            if (micStatusText) {
+                                micStatusText.textContent = `🎙️ Transcribing: "${currentHeard.slice(0, 30)}..."`;
+                                micStatusText.style.color = '#10b981';
+                            }
+                        }
+
+                        // Silence endpointing (650ms after speech pause)
+                        clearTimeout(silenceTimer);
+                        silenceTimer = setTimeout(() => {
+                            if (currentHeard && isInCall && !isAgentSpeaking && !isCommittingTurn) {
+                                commitUserSpeechTurn();
+                            }
+                        }, 700);
+                    };
+
+                    recognition.onerror = (e) => {
+                        console.warn('SpeechRecognition notice:', e.error);
+                        // Do not abort; MediaRecorder + VAD loop keeps audio streaming actively
+                        if (micStatusText && isInCall) {
+                            micStatusText.textContent = 'Microphone: Active (Gemini ASR Mode)';
+                            micStatusText.style.color = '#38bdf8';
+                        }
+                    };
+
+                    recognition.onend = () => {
+                        clearTimeout(silenceTimer);
+                        // If not committing turn and call is active, restart handsfree listening
+                        if (isInCall && isHandsfree && !isMuted && !isAgentSpeaking && !isCommittingTurn) {
+                            setTimeout(() => startHandsfreeListening(), 300);
+                        }
+                    };
+
+                    recognition.start();
+                    return;
+                } catch (recErr) {
+                    console.warn('SpeechRecognition launch notice:', recErr);
+                }
+            }
+        }
+
+        function stopHandsfreeListening() {
+            clearTimeout(silenceTimer);
+            if (recognition) {
+                try { recognition.abort(); } catch (e) {}
+                recognition = null;
+            }
+            if (continuousMediaRecorder && continuousMediaRecorder.state !== 'inactive') {
+                try { continuousMediaRecorder.stop(); } catch (e) {}
+                continuousMediaRecorder = null;
+            }
+            if (isRecording) {
+                stopRecording();
+            }
+        }
+
+        // Process user speech in call
+        async function handleVoiceTurn(userText) {
+            if (!isInCall) return;
+
+            setWaveState('thinking');
+            callStatusText.textContent = 'Alex is thinking... 💭';
+            agentSubtext.textContent = `Answering: "${userText}"`;
+            addMessage('user', userText);
+
+            try {
+                const chosenVoice = voiceSelect ? voiceSelect.value : 'en-US-JennyNeural';
+                const response = await fetch('/api/dialer/call/interact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: userText,
+                        call_id: currentCallId,
+                        voice: chosenVoice
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+
+                const data = await response.json();
+                addMessage('bot', data.response, data.audio_url);
+
+                if (data.action === 'transfer' && data.transfer) {
+                    addTransferBanner(data.transfer);
+                }
+
+                // Play speech answer aloud and wait for it to finish
+                await playVoiceResponse(data.response, data.audio_url);
+
+                // If call hung up
+                if (data.action === 'hangup' || data.call_status === 'completed') {
+                    endVoiceCall('Call completed');
+                    return;
+                }
+
+                // Automatically resume listening for caller's next turn!
+                if (isInCall && isHandsfree && !isMuted) {
+                    startHandsfreeListening();
+                } else if (isInCall) {
+                    callStatusText.textContent = 'In Call with Alex 🟢';
+                    setWaveState('off');
+                }
+            } catch (err) {
+                console.error('Turn processing error:', err);
+                showError('Error communicating with AI agent. Please speak again.');
+                if (isInCall && isHandsfree && !isMuted) {
+                    setTimeout(() => startHandsfreeListening(), 1000);
+                }
+            }
+        }
+
+        // Play Voice Response (Server audio with Browser TTS fallback)
+        function playVoiceResponse(text, audioUrl) {
+            return new Promise((resolve) => {
+                if (!isSpeakerOn) {
+                    resolve();
+                    return;
+                }
+
+                isAgentSpeaking = true;
+                agentSpeechStartTime = Date.now();
+                setWaveState('agent-speaking');
+                callStatusText.textContent = '🔊 Alex is speaking...';
+
+                let hasFinished = false;
+                const finish = () => {
+                    if (!hasFinished) {
+                        hasFinished = true;
+                        isAgentSpeaking = false;
+                        setWaveState('off');
+                        resolve();
+                    }
+                };
+
+                // Fallback to Web Speech if no audio URL
+                const speakFallback = () => {
+                    if ('speechSynthesis' in window && text) {
+                        try {
+                            window.speechSynthesis.cancel();
+                            const clean = text.replace(/[*_#`]/g, '').trim();
+                            const utterance = new SpeechSynthesisUtterance(clean);
+                            utterance.rate = 1.0;
+                            utterance.pitch = 1.0;
+                            utterance.lang = 'en-US';
+
+                            // Select voice
+                            const voices = window.speechSynthesis.getVoices();
+                            const preferredVoice = voiceSelect?.value?.includes('Guy') 
+                                ? voices.find(v => v.name.includes('David') || v.name.includes('Male') || v.name.includes('Guy'))
+                                : voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha') || v.name.includes('Jenny') || v.name.includes('Zira'));
+                            if (preferredVoice) utterance.voice = preferredVoice;
+
+                            utterance.onend = finish;
+                            utterance.onerror = finish;
+                            window.speechSynthesis.speak(utterance);
+                            return;
+                        } catch (e) {
+                            console.warn('Fallback speech error:', e);
+                        }
+                    }
+                    finish();
+                };
+
+                if (audioUrl) {
+                    try {
+                        stopSpeechAudio();
+                        currentCallAudio = new Audio(audioUrl);
+                        currentCallAudio.onended = finish;
+                        currentCallAudio.onerror = () => {
+                            console.warn('Server audio play failed, using browser speech synthesis');
+                            speakFallback();
+                        };
+                        currentCallAudio.play().catch(() => speakFallback());
+                    } catch (e) {
+                        speakFallback();
+                    }
+                } else {
+                    speakFallback();
+                }
+            });
+        }
+
+        function stopSpeechAudio() {
+            isAgentSpeaking = false;
+            if (currentCallAudio) {
+                try { currentCallAudio.pause(); currentCallAudio = null; } catch (e) {}
+            }
+            if ('speechSynthesis' in window) {
+                try { window.speechSynthesis.cancel(); } catch (e) {}
+            }
+        }
+
+        // Web Simulator Scenario Runner
+        async function runWebSimulator(queryText) {
+            const inspector = document.getElementById('simInspector');
+            if (inspector) {
+                inspector.innerHTML = `<span style="color:#fbbf24;">⏳ [Webhook Contract] Sending turn: "${queryText}"...</span>`;
+            }
+            try {
+                const t0 = Date.now();
+                const res = await fetch('/api/webhook/turn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        call_id: 'sim-' + Date.now(),
+                        text: queryText
+                    })
+                });
+                const data = await res.json();
+                const elapsed = Date.now() - t0;
+                if (inspector) {
+                    inspector.innerHTML = `
+<span style="color:#34d399; font-weight:700;">✅ HTTP 200 OK — Turn Response (${elapsed}ms):</span>
+<span style="color:#38bdf8; font-weight:700;">Action:</span> <span style="color:#ffffff;">${data.action}</span> | <span style="color:#38bdf8; font-weight:700;">Intent:</span> <span style="color:#ffffff;">${data.intent}</span> | <span style="color:#38bdf8; font-weight:700;">Disposition:</span> <span style="color:#ffffff;">${data.disposition}</span>
+<span style="color:#f59e0b; font-weight:700;">Spoken Reply:</span> "${data.reply}"
+<span style="color:#a78bfa; font-weight:700;">Latency Budget:</span> ASR: ${data.timing_ms?.asr || 0}ms | LLM: ${data.timing_ms?.llm || 0}ms | TTS: ${data.timing_ms?.tts || 0}ms | Total: ${data.timing_ms?.total || 0}ms
+${data.transfer ? `<span style="color:#ec4899; font-weight:700;">🔀 PBX Transfer:</span> Extension ${data.transfer.extension} (${data.transfer.name} - ${data.transfer.department}) [${data.transfer.sip_uri}]` : ''}
+
+<span style="color:#94a3b8;">JSON Contract:</span>
+${JSON.stringify(data, null, 2)}
+                    `.trim();
+                }
+            } catch (err) {
+                if (inspector) {
+                    inspector.innerHTML = `<span style="color:#ef4444;">❌ Simulator error: ${err.message}</span>`;
+                }
+            }
+        }
+
+        // In-Call Utility Controls
+        function toggleHandsfree() {
+            isHandsfree = !isHandsfree;
+            handsfreeBtn.classList.toggle('active', isHandsfree);
+            handsfreeIndicator.style.display = isHandsfree ? 'flex' : 'none';
+            if (isHandsfree && isInCall && !isMuted) {
+                startHandsfreeListening();
+            } else {
+                stopHandsfreeListening();
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            muteBtn.classList.toggle('muted', isMuted);
+            muteBtn.textContent = isMuted ? '🔇' : '🎤';
+            if (isMuted) {
+                stopHandsfreeListening();
+                callStatusText.textContent = 'Microphone Muted 🔇';
+            } else if (isInCall && isHandsfree) {
+                startHandsfreeListening();
+            }
+        }
+
+        function toggleSpeaker() {
+            isSpeakerOn = !isSpeakerOn;
+            speakerBtn.classList.toggle('active', isSpeakerOn);
+            speakerBtn.textContent = isSpeakerOn ? '🔊' : '🔈';
+            if (!isSpeakerOn) {
+                stopSpeechAudio();
+            }
+        }
+
+        function toggleKeypad() {
+            isKeypadOpen = !isKeypadOpen;
+            keypadBtn.classList.toggle('active', isKeypadOpen);
+            dialpadPanel.classList.toggle('open', isKeypadOpen);
+        }
+
+        function pressDtmfKey(key) {
+            playDtmfTone(key);
+            dialedDtmfDigits += key;
+            dialpadDisplay.textContent = dialedDtmfDigits;
+        }
+
+        function clearDialpad() {
+            dialedDtmfDigits = '';
+            dialpadDisplay.textContent = '_';
+        }
+
+        async function sendDialedDtmf() {
+            if (!dialedDtmfDigits) return;
+            const digits = dialedDtmfDigits;
+            clearDialpad();
+            toggleKeypad();
+            await sendTextToServer(`Dialed extension ${digits}`);
+        }
+
+        // Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick')?.includes(tabId));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            const targetContent = document.getElementById(tabId);
+            if (targetContent) targetContent.classList.add('active');
+
+            if (tabId === 'dialer-tab') {
+                loadExtensions();
+                loadRecentCalls();
+            }
+        }
+
+        // Text & Push-to-Talk Events
+        recordBtn.addEventListener('click', toggleRecording);
+        resetBtn.addEventListener('click', resetConversation);
+
+        textForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = textInput.value.trim();
+            if (text) {
+                textInput.value = '';
+                if (isInCall) {
+                    handleVoiceTurn(text);
+                } else {
+                    sendTextToServer(text);
+                }
+            }
+        });
+
+        chipBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const prompt = btn.getAttribute('data-prompt');
+                if (prompt) {
+                    if (isInCall) {
+                        handleVoiceTurn(prompt);
+                    } else {
+                        sendTextToServer(prompt);
+                    }
+                }
+            });
+        });
+
+        // Push-to-Talk single turn
+        async function toggleRecording() {
+            if (!isRecording) {
+                await startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        async function startRecording() {
+            try {
+                recognizedSpeechText = '';
+                const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognitionClass) {
+                    try {
+                        recognition = new SpeechRecognitionClass();
+                        recognition.continuous = true;
+                        recognition.interimResults = true;
+                        recognition.lang = 'en-US';
+
+                        recognition.onresult = (event) => {
+                            let interim = '';
+                            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                                if (event.results[i].isFinal) {
+                                    recognizedSpeechText += event.results[i][0].transcript + ' ';
+                                } else {
+                                    interim += event.results[i][0].transcript;
+                                }
+                            }
+                            const liveDisplay = (recognizedSpeechText + ' ' + interim).trim();
+                            if (liveDisplay) {
+                                statusDiv.textContent = `🎙️ Heard: "${liveDisplay}"`;
+                            }
+                        };
+                        recognition.onerror = () => {};
+                        recognition.start();
+                    } catch (recErr) {}
+                }
+
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Audio recording is not supported in this browser environment.');
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                let mimeType = '';
+                if (typeof MediaRecorder.isTypeSupported === 'function') {
+                    if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+                    else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+                    else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+                }
+
+                mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    const capturedSpeech = recognizedSpeechText.trim();
+                    if (capturedSpeech) {
+                        if (isInCall) {
+                            await handleVoiceTurn(capturedSpeech);
+                        } else {
+                            await sendTextToServer(capturedSpeech);
+                        }
+                    } else {
+                        const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+                        await sendAudioToServer(audioBlob);
+                    }
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordBtn.textContent = '⏹️ Stop';
+                recordBtn.classList.add('recording');
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '🎙️ Listening... Speak now!';
+                statusDiv.className = 'status recording';
+                setWaveState('caller-speaking');
+                errorDiv.style.display = 'none';
+            } catch (err) {
+                console.error('Microphone error:', err);
+                showError('Microphone permission needed. You can also chat by typing in the box above!');
+            }
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+            }
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            recordBtn.textContent = '🎤 Mic';
+            recordBtn.classList.remove('recording');
+            statusDiv.textContent = '⏳ Thinking...';
+            statusDiv.className = 'status processing';
+            setWaveState('thinking');
+        }
+
+        async function sendTextToServer(text) {
+            try {
+                errorDiv.style.display = 'none';
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = '⏳ Processing...';
+                statusDiv.className = 'status processing';
+                setWaveState('thinking');
+
+                addMessage('user', text);
+
+                const chosenVoice = voiceSelect ? voiceSelect.value : 'en-US-JennyNeural';
+                const response = await fetch('/api/dialer/call/interact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text, call_id: currentCallId, voice: chosenVoice })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.statusText);
+                }
+
+                const data = await response.json();
+                addMessage('bot', data.response, data.audio_url);
+
+                if (data.action === 'transfer' && data.transfer) {
+                    addTransferBanner(data.transfer);
+                }
+
+                await playVoiceResponse(data.response, data.audio_url);
+
+                if (data.action === 'hangup' || data.call_status === 'completed') {
+                    endVoiceCall('Call completed');
+                    return;
+                }
+
+                if (isInCall && isHandsfree && !isMuted) {
+                    startHandsfreeListening();
+                } else if (isInCall) {
+                    callStatusText.textContent = 'In Call with Alex 🟢';
+                    setWaveState('off');
+                }
+
+                statusDiv.textContent = 'Ready to listen';
+                statusDiv.className = 'status idle';
+                statusDiv.style.display = 'none';
+            } catch (err) {
+                console.error('Text process error:', err);
+                showError('Error processing request. Please try again.');
+                statusDiv.style.display = 'none';
+                setWaveState('off');
+            }
+        }
+
+        async function sendAudioToServer(audioBlob) {
+            setWaveState('thinking');
+            callStatusText.textContent = 'Alex is thinking... 💭';
+            agentSubtext.textContent = 'Processing your speech...';
+
+            try {
+                const chosenVoice = voiceSelect ? voiceSelect.value : 'en-US-JennyNeural';
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                formData.append('call_id', currentCallId);
+                formData.append('voice', chosenVoice);
+
+                const response = await fetch('/api/dialer/call/interact', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Server error: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                if (data.transcription) {
+                    addMessage('user', data.transcription);
+                    agentSubtext.textContent = `Heard: "${data.transcription}"`;
+                }
+
+                addMessage('bot', data.response, data.audio_url);
+
+                if (data.action === 'transfer' && data.transfer) {
+                    addTransferBanner(data.transfer);
+                }
+
+                await playVoiceResponse(data.response, data.audio_url);
+
+                if (data.action === 'hangup' || data.call_status === 'completed') {
+                    endVoiceCall('Call completed');
+                    return;
+                }
+
+                if (isInCall && isHandsfree && !isMuted) {
+                    startHandsfreeListening();
+                } else if (isInCall) {
+                    callStatusText.textContent = 'In Call with Alex 🟢';
+                    setWaveState('off');
+                }
+
+                statusDiv.style.display = 'none';
+            } catch (err) {
+                console.error('Audio turn error:', err);
+                showError('Error processing audio. Please speak again.');
+                statusDiv.style.display = 'none';
+                setWaveState('off');
+                if (isInCall && isHandsfree && !isMuted) {
+                    setTimeout(() => startHandsfreeListening(), 1000);
+                }
+            }
+        }
+
+        function speakWithBrowserTTS(text) {
+            if ('speechSynthesis' in window && text) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const clean = text.replace(/[*_#`]/g, '').trim();
+                    const utterance = new SpeechSynthesisUtterance(clean);
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.0;
+                    utterance.lang = 'en-US';
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.warn('Browser speech synthesis error:', e);
+                }
+            }
+        }
+
+        function addMessage(type, text, audioUrl = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const label = document.createElement('div');
+            label.className = 'message-label';
+            label.textContent = type === 'user' ? '👤 Caller' : '🤖 Alex (AI Agent)';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+
+            messageDiv.appendChild(label);
+            messageDiv.appendChild(textDiv);
+
+            if (type === 'bot' && audioUrl) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.className = 'audio-player';
+                audio.src = audioUrl;
+                messageDiv.appendChild(audio);
+            }
+
+            conversationDiv.appendChild(messageDiv);
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        }
+
+        function addTransferBanner(transfer) {
+            const transferDiv = document.createElement('div');
+            transferDiv.className = 'message transfer';
+            transferDiv.innerHTML = `
+                <div class="transfer-banner">
+                    <div class="icon">🔀</div>
+                    <div class="details">
+                        <div class="title">Call Transferred to ${transfer.name} (Ext ${transfer.extension})</div>
+                        <div class="sip-info">Routing SIP: <strong>${transfer.sip_uri}</strong> | Dept: ${transfer.department}</div>
+                    </div>
+                </div>
+            `;
+            conversationDiv.appendChild(transferDiv);
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        }
+
+        async function resetConversation() {
+            currentCallId = `call-${Date.now()}`;
+            stopSpeechAudio();
+            if (isInCall) {
+                endVoiceCall('Conversation reset');
+            }
+            await fetch(`/api/reset/${currentCallId}`, { method: 'POST' });
+            conversationDiv.innerHTML = `
+                <div class="message bot">
+                    <div class="message-label">🤖 Alex (AI Agent)</div>
+                    <div class="message-text">Hello! I'm Alex, your AI voice calling agent. Press "Start Voice Call" or ask me anything—I can answer any general questions, help with accounts, or connect you to any department.</div>
+                </div>
+            `;
+            errorDiv.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorDiv.innerHTML = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // ==========================================
+        // DIALER SIMULATOR FUNCTIONS
+        // ==========================================
+        async function loadExtensions() {
+            try {
+                const res = await fetch('/api/dialer/extensions');
+                const data = await res.json();
+                const container = document.getElementById('extContainer');
+                if (!container) return;
+
+                container.innerHTML = data.extensions.map(ext => `
+                    <div class="ext-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="ext-badge">Ext ${ext.id}</span>
+                            <span style="font-size:0.75rem; color:#64748b;">${ext.dept}</span>
+                        </div>
+                        <div class="ext-name">${ext.name}</div>
+                        <div class="ext-sip">${ext.sip}</div>
+                        <button class="ext-test-btn" onclick="testDirectTransfer('${ext.id}', '${ext.name}')">
+                            🔀 Route Call to Ext ${ext.id}
+                        </button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error('Failed to load extensions:', e);
+            }
+        }
+
+        async function testDirectTransfer(extId, extName) {
+            switchTab('voice-tab');
+            addMessage('user', `Please transfer my call directly to extension ${extId}`);
+            try {
+                const res = await fetch('/api/dialer/call/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ call_id: currentCallId, extension_id: extId })
+                });
+                const data = await res.json();
+                addMessage('bot', data.transfer_message, data.audio_url);
+                addTransferBanner(data.transfer);
+            } catch (err) {
+                showError('Transfer request failed.');
+            }
+        }
+
+        async function simulateInboundCall() {
+            const callerId = document.getElementById('inboundCallerId').value;
+            const greeting = document.getElementById('inboundGreeting').value;
+
+            currentCallId = `inbound-${Date.now()}`;
+            switchTab('voice-tab');
+            conversationDiv.innerHTML = '';
+
+            try {
+                statusDiv.textContent = '📞 Inbound Call Ringing... Connecting...';
+                statusDiv.className = 'status processing';
+
+                const res = await fetch('/api/dialer/call/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        call_id: currentCallId,
+                        direction: 'inbound',
+                        caller_id: callerId,
+                        custom_greeting: greeting
+                    })
+                });
+                const data = await res.json();
+
+                addMessage('bot', data.greeting, data.audio_url);
+                statusDiv.textContent = `📞 Connected to Inbound Caller (${callerId})`;
+                statusDiv.className = 'status idle';
+            } catch (e) {
+                showError('Failed to simulate inbound call.');
+            }
+        }
+
+        async function simulateOutboundCall() {
+            const name = document.getElementById('outboundName').value;
+            const phone = document.getElementById('outboundPhone').value;
+            const campaign = document.getElementById('outboundCampaign').value;
+
+            currentCallId = `outbound-${Date.now()}`;
+            switchTab('voice-tab');
+            conversationDiv.innerHTML = '';
+
+            try {
+                statusDiv.textContent = `🚀 Outbound AI Agent Dialing ${name} (${phone})...`;
+                statusDiv.className = 'status processing';
+
+                const res = await fetch('/api/dialer/call/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        call_id: currentCallId,
+                        direction: 'outbound',
+                        caller_id: phone,
+                        customer_name: name,
+                        campaign: campaign
+                    })
+                });
+                const data = await res.json();
+
+                addMessage('bot', data.greeting, data.audio_url);
+                statusDiv.textContent = `📞 Outbound Agent Call Connected to ${name} (${campaign})`;
+                statusDiv.className = 'status idle';
+            } catch (e) {
+                showError('Failed to launch outbound call.');
+            }
+        }
+
+        async function loadRecentCalls() {
+            try {
+                const res = await fetch('/api/dialer/calls');
+                const data = await res.json();
+                const container = document.getElementById('recentCallsContainer');
+                if (!container) return;
+
+                if (!data.calls || data.calls.length === 0) {
+                    container.innerHTML = '<div style="color:#64748b; padding:8px;">No calls logged yet. Start an inbound or outbound call above.</div>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                        <thead>
+                            <tr style="border-bottom:1px solid #cbd5e1; color:#475569;">
+                                <th style="padding:6px 8px;">Call ID</th>
+                                <th style="padding:6px 8px;">Type</th>
+                                <th style="padding:6px 8px;">Contact</th>
+                                <th style="padding:6px 8px;">Status</th>
+                                <th style="padding:6px 8px;">Transfer Route</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.calls.slice(0, 8).map(c => `
+                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                    <td style="padding:6px 8px; font-family:monospace; font-size:0.8rem;">${c.callId}</td>
+                                    <td style="padding:6px 8px;"><span style="text-transform:capitalize; font-weight:600;">${c.direction}</span></td>
+                                    <td style="padding:6px 8px;">${c.customerName || c.callerId}</td>
+                                    <td style="padding:6px 8px;"><span style="color:${c.status === 'transferred' ? '#2563eb' : (c.status === 'connected' ? '#10b981' : '#64748b')}; font-weight:700;">${c.status}</span></td>
+                                    <td style="padding:6px 8px;">${c.transferredTo ? `<span class="ext-badge">Ext ${c.transferredTo.id} (${c.transferredTo.name})</span>` : '—'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {
+                console.error('Failed to load recent calls:', e);
+            }
+        }
+
+        function copySnippet(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            navigator.clipboard.writeText(el.textContent).then(() => {
+                alert('Code snippet copied to clipboard!');
+            });
+        }
+
+        // Initial Load
+        loadExtensions();
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "ai-call-assistant",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "lint": "node --check server.js",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.6",
+    "edge-tts-universal": "^1.4.0",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.6.0",
+    "multer": "^2.4.0"
+  }
+}
